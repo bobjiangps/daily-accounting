@@ -26,8 +26,8 @@ with open(os.path.join(BASE_DIR, "config", "config.json"), "r") as store_file:
 SECRET_KEY = STORED['secret_key']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-# DEBUG = False
+# DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -59,7 +59,7 @@ ROOT_URLCONF = 'rdie.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
