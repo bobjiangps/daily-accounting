@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,23 +10,30 @@
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.0.0/dist/echarts.min.js"></script>
+    <link rel="stylesheet" href="{% static 'accounting/css/accounting.css' %}">
     <title>记录收支</title>
 </head>
 <body>
     {% if user.is_authenticated %}
-    <div class="sample">
-        <div class="dropdown" align="left" style="float:left; padding: 0px 20px">
-          <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            大类
-          </a>
-          <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-            <a class="dropdown-item" href="#">餐饮</a>
-            <a class="dropdown-item" href="#">购物</a>
-            <a class="dropdown-item" href="#">娱乐</a>
-          </div>
-        </div>
-        <div class="record">
-            <button type="button" class="btn btn-info">记一笔</button>
+    <div class="container" id="top-container">
+        <ul class="nav nav-tabs justify-content-center" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" data-toggle="tab" href="#home">记账</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#charts">图表</a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div id="home" class="container tab-pane active"><br>
+                <h3>在这里记账</h3>
+                <p>这里会展示资金账户和当月记账详细信息</p>
+            </div>
+            <div id="charts" class="container tab-pane fade"><br>
+                <h3>在这里看图表分析</h3>
+                <p>这里会展示不同周期和不同类别的图表分析</p>
+            </div>
         </div>
     </div>
     {% else %}
