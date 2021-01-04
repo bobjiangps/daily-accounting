@@ -26,9 +26,42 @@
         </ul>
 
         <div class="tab-content">
-            <div id="home" class="container tab-pane active"><br>
-                <h3>在这里记账</h3>
-                <p>这里会展示资金账户和当月记账详细信息</p>
+            <div id="home" class="container-fluid tab-pane active"><br>
+                <div class="row">
+                    <div class="col-lg-6 mb-6">
+                        <div id="month-overview" align="center">
+                            <span>当月结余</span>
+                            <h5>-3928.5</h5>
+                        </div>
+                        <div class="row">
+                            <div class="col" align="center">
+                                <span>当月收入</span>
+                                <h6>555555</h6>
+                            </div>
+                            <div class="col" align="center">
+                                <span>当月支出</span>
+                                <h6>600000</h6>
+                            </div>
+                        </div>
+                        <hr width="90%" class="main-separator"/>
+                        <div id="account-overview" align="center">
+                            {% for account in accounts %}
+                            <span>{{ account.name }}</span>
+                            <span>{{ account.amount }}</span>
+                            <hr width="60%"/>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-lg-6 mb-6" id="category-overview" align="center">
+                        <h5>当前类型列表</h5>
+                        <hr width="90%" class="main-separator"/>
+                        {% for sub_category in sub_categories %}
+                        <span>{{ sub_category.parent }}</span>
+                        <span>{{ sub_category.name }}</span>
+                        <hr width="60%"/>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
             <div id="charts" class="container tab-pane fade"><br>
                 <h3>在这里看图表分析</h3>

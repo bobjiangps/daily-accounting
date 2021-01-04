@@ -1,3 +1,7 @@
 #top-container {
   padding: 50px;
 }
+
+.main-separator {
+  border:1px solid #FFD700
+}
