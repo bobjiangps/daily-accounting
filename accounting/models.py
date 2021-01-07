@@ -9,6 +9,9 @@ class Currency(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        ordering = ['id']
+
 
 class Account(models.Model):
     name = models.CharField(max_length=100)
@@ -21,11 +24,14 @@ class Account(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        ordering = ['created_date']
+
 
 class Category(models.Model):
     CATEGORY_TYPES = (
-       ("Income", "income"),
-       ("Expense", "expense")
+       ("收入", "income"),
+       ("支出", "expense")
     )
     name = models.CharField(max_length=100)
     icon = models.CharField(max_length=100)
@@ -33,6 +39,9 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        ordering = ['id']
 
 
 class SubCategory(models.Model):
@@ -43,6 +52,9 @@ class SubCategory(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        ordering = ['id']
+
 
 class HistoryRecord(models.Model):
     time_of_occurrence = models.DateTimeField(default=timezone.now)
@@ -50,6 +62,9 @@ class HistoryRecord(models.Model):
     sub_category = models.ForeignKey(SubCategory, on_delete=models.SET_NULL, null=True, blank=True)
     currency = models.ForeignKey(Currency, on_delete=models.SET_NULL, null=True, default=1)
     amount = models.DecimalField(max_digits=8, decimal_places=2)
-    comment = models.CharField(max_length=500)
+    comment = models.CharField(max_length=500, null=True, blank=True)
     created_date = models.DateTimeField(default=timezone.now)
     updated_date = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ['-time_of_occurrence']

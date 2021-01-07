@@ -5,3 +5,7 @@
 .main-separator {
   border:1px solid #FFD700
 }
+
+#account-overview {
+  margin: 0px 0px 20px 0px;
+}
