@@ -32,16 +32,16 @@
                     <div class="col-lg-6 mb-6">
                         <div id="month-overview" align="center">
                             <span>当月结余</span>
-                            <h5>-3928.5</h5>
+                            <h5>-3928.5(测试数据)</h5>
                         </div>
                         <div class="row">
                             <div class="col" align="center">
                                 <span>当月收入</span>
-                                <h6>555555</h6>
+                                <h6>555555(测试数据)</h6>
                             </div>
                             <div class="col" align="center">
                                 <span>当月支出</span>
-                                <h6>600000</h6>
+                                <h6>600000(测试数据)</h6>
                             </div>
                         </div>
                         <hr width="90%" class="main-separator"/>
@@ -60,14 +60,45 @@
                         </div>
                         <hr width="90%" class="main-separator"/>
                     </div>
-                    <div class="col-lg-6 mb-6" id="category-overview" align="center">
-                        <h5>当前类型列表</h5>
+                    <div class="col-lg-6 mb-6" id="history-records-overview" align="center">
+                        <div class="form-row">
+                            <div class="col-md-4 mb-3">
+                                <select class="custom-select" id="ie-type-list">
+                                    {% for ie in ie_types %}
+                                    <option value="{{ ie.1 }}">{{ ie.0 }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <select class="custom-select" id="category-list">
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <select class="custom-select" id="sub-category-list">
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-5 mb-3">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <select class="custom-select" id="currency-list">
+                                        {% for c in currencies %}
+                                        <option value="{{ c.id }}">{{ c.name }}</option>
+                                        {% endfor %}
+                                        </select>
+                                    </div>
+                                    <input type="text" aria-label="Money Amount" placeholder="金额" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-7 mb-3">
+                                <input type="text" aria-label="Comment" placeholder="备注" class="form-control">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-info btn-block">记录账单</button>
+                        <br>
+                        <h5>当月账单列表</h5>
                         <hr width="90%" class="main-separator"/>
-                        {% for sub_category in sub_categories %}
-                        <span>{{ sub_category.parent }}</span>
-                        <span>{{ sub_category.name }}</span>
-                        <hr width="60%"/>
-                        {% endfor %}
                     </div>
                 </div>
             </div>
@@ -83,4 +114,15 @@
     </div>
     {% endif %}
 </body>
+<script>
+    $(function () {
+        $("#ie-type-list").find("option[value='expense']").attr("selected", true);
+
+        $('#ie-type-list').change(function(){
+            var a = $(this).children('option:selected').val();
+            alert(a);
+        });
+
+    })
+</script>
 </html>
