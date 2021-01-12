@@ -22,5 +22,18 @@ def index(request):
 def retrieve_category(request):
     ie_type = request.POST.get('ie_type')
     categories = Category.objects.filter(category_type=ie_type)
+    category_list = []
+    for c in categories:
+        category_list.append(c.name)
     # return HttpResponse(f'{"categories": {categories}}', content_type='application/json')
-    return JsonResponse(f'{"categories": {categories}}')
+    return JsonResponse({"categories": category_list})
+
+
+def retrieve_subcategory(request):
+    category_type = request.POST.get('category_type')
+    current_category = Category.objects.filter(name=category_type)[0]
+    subcategories = SubCategory.objects.filter(parent=current_category)
+    subcategory_list = []
+    for sc in subcategories:
+        subcategory_list.append(sc.name)
+    return JsonResponse({"subcategories": subcategory_list})
