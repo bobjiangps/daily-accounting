@@ -114,13 +114,108 @@
     </div>
     {% endif %}
 </body>
+<script>$.ajaxSetup({headers: {"X-CSRFToken": '{{ csrf_token }}'}});</script>
 <script>
     $(function () {
-        $("#ie-type-list").find("option[value='expense']").attr("selected", true);
+        var init_ie_type = 'expense'
+        var init_category_type = '餐饮'
+        $("#ie-type-list").find(`option[value=${init_ie_type}]`).attr("selected", true);
+        $.ajax({
+            type: "POST",
+            data: {ie_type: init_ie_type},
+            url: "{% url 'retrieve_category' %}",
+            cache: false,
+            dataType: "json",
+            success: function (result) {
+                var options = "";
+                result["categories"].forEach(function(val,index,arr) {
+                    new_option = '<option value="' + val + '">' + val + '</option>';
+                    options += new_option;
+                });
+                var category_list = document.getElementById("category-list");
+                category_list.innerHTML = options;
+                $("#category-list").find(`option[value=${init_category_type}]`).attr("selected", true);
+            }
+        });
+        $.ajax({
+            type: "POST",
+            data: {category_type: init_category_type},
+            url: "{% url 'retrieve_subcategory' %}",
+            cache: false,
+            dataType: "json",
+            success: function (result) {
+                var options = '<option value="select value" selected="selected">选择子类别</option>';
+                result["subcategories"].forEach(function(val,index,arr) {
+                    new_option = '<option value="' + val + '">' + val + '</option>';
+                    options += new_option;
+                });
+                var sub_category_list = document.getElementById("sub-category-list");
+                sub_category_list.innerHTML = options;
+            }
+        });
 
         $('#ie-type-list').change(function(){
-            var a = $(this).children('option:selected').val();
-            alert(a);
+            var current_ie_type = $(this).children('option:selected').val();
+            $.ajax({
+                type: "POST",
+                data: {ie_type: current_ie_type},
+                url: "{% url 'retrieve_category' %}",
+                cache: false,
+                dataType: "json",
+                success: function (result) {
+                    var options = "";
+                    result["categories"].forEach(function(val,index,arr) {
+                        if (index == 0) {
+                            new_option = '<option value="' + val + '" selected="selected">' + val + '</option>';
+                            options += new_option;
+                        }
+                        else {
+                            new_option = '<option value="' + val + '">' + val + '</option>';
+                            options += new_option;
+                        }
+                    });
+                    var category_list = document.getElementById("category-list");
+                    category_list.innerHTML = options;
+
+                    var current_category_type = $('#category-list').children('option:selected').val();
+                    $.ajax({
+                        type: "POST",
+                        data: {category_type: current_category_type},
+                        url: "{% url 'retrieve_subcategory' %}",
+                        cache: false,
+                        dataType: "json",
+                        success: function (result) {
+                            var options = '<option value="select value" selected="selected">选择子类别</option>';
+                            result["subcategories"].forEach(function(val,index,arr) {
+                                new_option = '<option value="' + val + '">' + val + '</option>';
+                                options += new_option;
+                            });
+                            var sub_category_list = document.getElementById("sub-category-list");
+                            sub_category_list.innerHTML = options;
+                        }
+                    });
+                }
+            });
+        });
+
+        $('#category-list').change(function(){
+            var current_category_type = $(this).children('option:selected').val();
+            $.ajax({
+                type: "POST",
+                data: {category_type: current_category_type},
+                url: "{% url 'retrieve_subcategory' %}",
+                cache: false,
+                dataType: "json",
+                success: function (result) {
+                    var options = '<option value="select value" selected="selected">选择子类别</option>';
+                    result["subcategories"].forEach(function(val,index,arr) {
+                        new_option = '<option value="' + val + '">' + val + '</option>';
+                        options += new_option;
+                    });
+                    var sub_category_list = document.getElementById("sub-category-list");
+                    sub_category_list.innerHTML = options;
+                }
+            });
         });
 
     })
