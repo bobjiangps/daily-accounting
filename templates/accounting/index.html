@@ -11,6 +11,8 @@
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.0.0/dist/echarts.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/jquery-datetimepicker@2.5.21/build/jquery.datetimepicker.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/jquery-datetimepicker@2.5.21/build/jquery.datetimepicker.full.min.js"></script>
     <link rel="stylesheet" href="{% static 'accounting/css/accounting.css' %}">
     <title>记录收支</title>
 </head>
@@ -95,10 +97,23 @@
                                 <input type="text" aria-label="Comment" placeholder="备注" class="form-control">
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-info btn-block">记录账单</button>
+                        <div class="form-row">
+                            <div class="col-md-4 mb-3">
+                                <input id="time-occurrence" type="text" class="form-control">
+                            </div>
+                            <div class="col-md-8 mb-3">
+                                <button type="submit" class="btn btn-info btn-block">记录账单</button>
+                            </div>
+                        </div>
                         <br>
                         <h5>当月账单列表</h5>
                         <hr width="90%" class="main-separator"/>
+                        <br><br><br><br><br><br>
+                        <form action="" method="post" enctype="multipart/form-data">
+                         {{ form.as_p }}
+                          {% csrf_token %}
+                          <p><input type="submit" class="btn btn-success" value="Save content"></p>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -115,6 +130,24 @@
     {% endif %}
 </body>
 <script>$.ajaxSetup({headers: {"X-CSRFToken": '{{ csrf_token }}'}});</script>
+<script>
+    function getCurrentDateFormat() {
+        var date = new Date();
+        var year = date.getFullYear();
+        var month = date.getMonth() + 1;
+        var day = date.getDate();
+        var hour = date.getHours();
+        var minute = date.getMinutes();
+        if (month >= 1 && month <= 9) {
+            month = '0' + month;
+        }
+        if (day >= 0 && day <= 9) {
+            day = '0' + day;
+        }
+        var currentDate = year + '-' + month + '-' + day + " " + hour + ":" + minute;
+        return currentDate;
+    }
+</script>
 <script>
     $(function () {
         var init_ie_type = 'expense'
@@ -216,6 +249,11 @@
                     sub_category_list.innerHTML = options;
                 }
             });
+        });
+
+        $("#time-occurrence").attr("value", getCurrentDateFormat());
+        $("#time-occurrence").datetimepicker( {
+            format:'Y-m-d H:i',
         });
 
     })
