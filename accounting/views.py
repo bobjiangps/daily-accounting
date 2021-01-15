@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from .models import *
+from .forms import HistoryRecordForm
 
 
 def index(request):
@@ -37,3 +38,9 @@ def retrieve_subcategory(request):
     for sc in subcategories:
         subcategory_list.append(sc.name)
     return JsonResponse({"subcategories": subcategory_list})
+
+
+def record_income_expense(request):
+    # form = HistoryRecordForm(request.POST)
+    # print(form)
+    print(request.POST)

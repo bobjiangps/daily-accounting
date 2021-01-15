@@ -63,57 +63,54 @@
                         <hr width="90%" class="main-separator"/>
                     </div>
                     <div class="col-lg-6 mb-6" id="history-records-overview" align="center">
-                        <div class="form-row">
-                            <div class="col-md-4 mb-3">
-                                <select class="custom-select" id="ie-type-list">
-                                    {% for ie in ie_types %}
-                                    <option value="{{ ie.1 }}">{{ ie.0 }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <select class="custom-select" id="category-list">
-                                </select>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <select class="custom-select" id="sub-category-list">
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="col-md-5 mb-3">
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <select class="custom-select" id="currency-list">
-                                        {% for c in currencies %}
-                                        <option value="{{ c.id }}">{{ c.name }}</option>
+                        <form action="{% url 'record_income_expense' %}" method="post" class="history-record-form">
+                            {% csrf_token %}
+                            <div class="form-row">
+                                <div class="col-md-4 mb-3">
+                                    <select class="custom-select" id="ie-type-list" name="ie-type">
+                                        {% for ie in ie_types %}
+                                        <option value="{{ ie.1 }}">{{ ie.0 }}</option>
                                         {% endfor %}
-                                        </select>
-                                    </div>
-                                    <input type="text" aria-label="Money Amount" placeholder="金额" class="form-control">
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <select class="custom-select" id="category-list" name="category">
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <select class="custom-select" id="sub-category-list" name="sub-category">
+                                    </select>
                                 </div>
                             </div>
-                            <div class="col-md-7 mb-3">
-                                <input type="text" aria-label="Comment" placeholder="备注" class="form-control">
+                            <div class="form-row">
+                                <div class="col-md-5 mb-3">
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <select class="custom-select" id="currency-list" name="currency">
+                                            {% for c in currencies %}
+                                            <option value="{{ c.id }}">{{ c.name }}</option>
+                                            {% endfor %}
+                                            </select>
+                                        </div>
+                                        <input type="text" name="money-amount" aria-label="Money Amount" placeholder="金额" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-md-7 mb-3">
+                                    <input type="text" name="comment" aria-label="Comment" placeholder="备注" class="form-control">
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="col-md-4 mb-3">
-                                <input id="time-occurrence" type="text" class="form-control">
+                            <div class="form-row">
+                                <div class="col-md-4 mb-3">
+                                    <input id="time-occurrence" name="time-occur" type="text" class="form-control">
+                                </div>
+                                <div class="col-md-8 mb-3">
+                                    <button type="submit" class="btn btn-info btn-block">记录账单</button>
+                                </div>
                             </div>
-                            <div class="col-md-8 mb-3">
-                                <button type="submit" class="btn btn-info btn-block">记录账单</button>
-                            </div>
-                        </div>
+                        </form>
                         <br>
                         <h5>当月账单列表</h5>
                         <hr width="90%" class="main-separator"/>
-                        <br><br><br><br><br><br>
-                        <form action="" method="post" enctype="multipart/form-data">
-                         {{ form.as_p }}
-                          {% csrf_token %}
-                          <p><input type="submit" class="btn btn-success" value="Save content"></p>
-                        </form>
                     </div>
                 </div>
             </div>
