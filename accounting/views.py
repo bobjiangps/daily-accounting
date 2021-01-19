@@ -3,6 +3,7 @@ from django.http import HttpResponse, JsonResponse
 from .models import *
 from .forms import HistoryRecordForm
 import datetime
+import decimal
 
 
 def index(request):
@@ -10,7 +11,7 @@ def index(request):
     all_accounts = Account.objects.all()
     currencies = Currency.objects.all()
     ie_types = Category.CATEGORY_TYPES
-    history_records = HistoryRecord.objects.filter(time_of_occurrence__year=today.year, time_of_occurrence__month=today.month)
+    history_records = HistoryRecord.objects.filter(time_of_occurrence__year=today.year, time_of_occurrence__month=today.month).order_by("-time_of_occurrence")
     income = 0
     expense = 0
     for hr in history_records:
@@ -70,6 +71,13 @@ def record_income_expense(request):
                                            updated_date=time_now
                                            )
             history_record.save()
+            current_account = Account.objects.filter(id=account)[0]
+            current_ie_type = Category.objects.filter(id=category)[0].category_type
+            if current_ie_type.lower() == "expense":
+                current_account.amount -= decimal.Decimal(amount)
+            elif current_ie_type.lower() == "income":
+                current_account.amount += decimal.Decimal(amount)
+            current_account.save()
         except Exception as e:
             print("not valid in request with error: %s" % str(e))
     else:
@@ -93,6 +101,12 @@ def record_income_expense(request):
                                            updated_date=time_now
                                            )
             history_record.save()
+            current_ie_type = category.category_type
+            if current_ie_type.lower() == "expense":
+                account.amount -= decimal.Decimal(amount)
+            elif current_ie_type.lower() == "income":
+                account.amount += decimal.Decimal(amount)
+            account.save()
         else:
             print("not valid in form")
     return redirect(index)
