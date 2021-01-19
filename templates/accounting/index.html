@@ -34,16 +34,16 @@
                     <div class="col-lg-6 mb-6">
                         <div id="month-overview" align="center">
                             <span>当月结余</span>
-                            <h5>-3928.5(测试数据)</h5>
+                            <h5>{{ current_month_income|add:current_month_expense }}(测试数据)</h5>
                         </div>
                         <div class="row">
                             <div class="col" align="center">
                                 <span>当月收入</span>
-                                <h6>555555(测试数据)</h6>
+                                <h6>{{ current_month_income }}(测试数据)</h6>
                             </div>
                             <div class="col" align="center">
                                 <span>当月支出</span>
-                                <h6>600000(测试数据)</h6>
+                                <h6>{{ current_month_expense }}(测试数据)</h6>
                             </div>
                         </div>
                         <hr width="90%" class="main-separator"/>
@@ -118,6 +118,10 @@
                         <br>
                         <h5>当月账单列表</h5>
                         <hr width="90%" class="main-separator"/>
+                        {% for hr in history_records %}
+                        <div>{{ hr.time_of_occurrence }} - {{ hr.account }} - {{ hr.category }} - {{ hr.amount }} - {{ hr.comment }}</div>
+                        <br>
+                        {% endfor %}
                     </div>
                 </div>
             </div>

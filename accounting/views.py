@@ -1,21 +1,30 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from .models import *
 from .forms import HistoryRecordForm
+import datetime
 
 
 def index(request):
+    today = datetime.date.today()
     all_accounts = Account.objects.all()
-    # categories = Category.objects.all()
-    # sub_categories = SubCategory.objects.all()
     currencies = Currency.objects.all()
     ie_types = Category.CATEGORY_TYPES
+    history_records = HistoryRecord.objects.filter(time_of_occurrence__year=today.year, time_of_occurrence__month=today.month)
+    income = 0
+    expense = 0
+    for hr in history_records:
+        if hr.category.category_type.lower() == "expense":
+            expense -= hr.amount
+        elif hr.category.category_type.lower() == "income":
+            income += hr.amount
     context = {
         'accounts': all_accounts,
-        # 'categories': categories,
-        # 'sub_categories': sub_categories,
         'currencies': currencies,
-        'ie_types': ie_types
+        'ie_types': ie_types,
+        'history_records': history_records,
+        'current_month_income': income,
+        'current_month_expense': expense
                }
     return render(request, 'accounting/index.html', context)
 
@@ -43,7 +52,6 @@ def retrieve_subcategory(request):
 def record_income_expense(request):
     sub_category = request.POST.get('sub_category')
     time_now = timezone.now()
-    success = False
     if sub_category == "select value":
         try:
             account = request.POST.get('account')
@@ -62,7 +70,6 @@ def record_income_expense(request):
                                            updated_date=time_now
                                            )
             history_record.save()
-            success = True
         except Exception as e:
             print("not valid in request with error: %s" % str(e))
     else:
@@ -86,7 +93,6 @@ def record_income_expense(request):
                                            updated_date=time_now
                                            )
             history_record.save()
-            success = True
         else:
             print("not valid in form")
-    return JsonResponse({"success": success})
+    return redirect(index)
