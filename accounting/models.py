@@ -57,6 +57,7 @@ class SubCategory(models.Model):
 
 
 class HistoryRecord(models.Model):
+    account = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, default=1)
     time_of_occurrence = models.DateTimeField(default=timezone.now)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
     sub_category = models.ForeignKey(SubCategory, on_delete=models.SET_NULL, null=True, blank=True)
