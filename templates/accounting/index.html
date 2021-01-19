@@ -34,16 +34,17 @@
                     <div class="col-lg-6 mb-6">
                         <div id="month-overview" align="center">
                             <span>当月结余</span>
-                            <h5>{{ current_month_income|add:current_month_expense }}(测试数据)</h5>
+                            <!--<h5>{{ current_month_income|add:current_month_expense }}(测试数据)</h5>-->
+                            <h5 id="month-surplus">{{ surplus }}(元)</h5>
                         </div>
                         <div class="row">
                             <div class="col" align="center">
                                 <span>当月收入</span>
-                                <h6>{{ current_month_income }}(测试数据)</h6>
+                                <h6 id="month-income">{{ current_month_income }}(元)</h6>
                             </div>
                             <div class="col" align="center">
                                 <span>当月支出</span>
-                                <h6>{{ current_month_expense }}(测试数据)</h6>
+                                <h6 id="month-expense">{{ current_month_expense }}(元)</h6>
                             </div>
                         </div>
                         <hr width="90%" class="main-separator"/>
@@ -158,6 +159,31 @@
 </script>
 <script>
     $(function () {
+        var current_month_surplus = $("#month-surplus").text();
+        $({numberValue: current_month_surplus}).animate({numberValue: parseFloat(current_month_surplus)}, {
+            duration: 1000,
+            easing: 'linear',
+            step: function (now) {
+                $('#month-surplus').text(now.toFixed(2));
+            }
+        });
+        var current_month_income = $("#month-income").text();
+        $({numberValue: current_month_income}).animate({numberValue: parseFloat(current_month_income)}, {
+            duration: 1000,
+            easing: 'linear',
+            step: function (now) {
+                $('#month-income').text(now.toFixed(2));
+            }
+        });
+        var current_month_expense = $("#month-expense").text();
+        $({numberValue: current_month_expense}).animate({numberValue: parseFloat(current_month_expense)}, {
+            duration: 1000,
+            easing: 'linear',
+            step: function (now) {
+                $('#month-expense').text(now.toFixed(2));
+            }
+        });
+
         var init_ie_type = 'expense'
         var init_category_type = '餐饮'
         $("#ie-type-list").find(`option[value=${init_ie_type}]`).attr("selected", true);

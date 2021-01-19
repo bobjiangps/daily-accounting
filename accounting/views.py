@@ -25,7 +25,8 @@ def index(request):
         'ie_types': ie_types,
         'history_records': history_records,
         'current_month_income': income,
-        'current_month_expense': expense
+        'current_month_expense': expense,
+        'surplus': income + expense
                }
     return render(request, 'accounting/index.html', context)
 
