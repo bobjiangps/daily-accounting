@@ -66,19 +66,26 @@
                         <form action="{% url 'record_income_expense' %}" method="post" class="history-record-form">
                             {% csrf_token %}
                             <div class="form-row">
-                                <div class="col-md-4 mb-3">
-                                    <select class="custom-select" id="ie-type-list" name="ie-type">
+                                <div class="col-md-3 mb-3">
+                                    <select class="custom-select" id="account-list" name="account">
+                                        {% for a in accounts %}
+                                        <option value="{{ a.id }}">{{ a.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <select class="custom-select" id="ie-type-list">
                                         {% for ie in ie_types %}
                                         <option value="{{ ie.1 }}">{{ ie.0 }}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
-                                <div class="col-md-4 mb-3">
+                                <div class="col-md-3 mb-3">
                                     <select class="custom-select" id="category-list" name="category">
                                     </select>
                                 </div>
-                                <div class="col-md-4 mb-3">
-                                    <select class="custom-select" id="sub-category-list" name="sub-category">
+                                <div class="col-md-3 mb-3">
+                                    <select class="custom-select" id="sub-category-list" name="sub_category">
                                     </select>
                                 </div>
                             </div>
@@ -92,7 +99,7 @@
                                             {% endfor %}
                                             </select>
                                         </div>
-                                        <input type="text" name="money-amount" aria-label="Money Amount" placeholder="金额" class="form-control">
+                                        <input type="text" name="amount" aria-label="Money Amount" placeholder="金额" class="form-control" required="">
                                     </div>
                                 </div>
                                 <div class="col-md-7 mb-3">
@@ -101,7 +108,7 @@
                             </div>
                             <div class="form-row">
                                 <div class="col-md-4 mb-3">
-                                    <input id="time-occurrence" name="time-occur" type="text" class="form-control">
+                                    <input id="time-occurrence" name="time_of_occurrence" type="text" class="form-control">
                                 </div>
                                 <div class="col-md-8 mb-3">
                                     <button type="submit" class="btn btn-info btn-block">记录账单</button>
@@ -159,12 +166,12 @@
             success: function (result) {
                 var options = "";
                 result["categories"].forEach(function(val,index,arr) {
-                    new_option = '<option value="' + val + '">' + val + '</option>';
+                    new_option = '<option value="' + val[0] + '">' + val[1] + '</option>';
                     options += new_option;
                 });
                 var category_list = document.getElementById("category-list");
                 category_list.innerHTML = options;
-                $("#category-list").find(`option[value=${init_category_type}]`).attr("selected", true);
+                $("#category-list option").filter(function(){return $(this).text()==init_category_type;}).attr("selected", true);
             }
         });
         $.ajax({
@@ -174,9 +181,9 @@
             cache: false,
             dataType: "json",
             success: function (result) {
-                var options = '<option value="select value" selected="selected">选择子类别</option>';
+                var options = '<option value="select value" selected="selected">选择子类</option>';
                 result["subcategories"].forEach(function(val,index,arr) {
-                    new_option = '<option value="' + val + '">' + val + '</option>';
+                    new_option = '<option value="' + val[0] + '">' + val[1] + '</option>';
                     options += new_option;
                 });
                 var sub_category_list = document.getElementById("sub-category-list");
@@ -196,18 +203,18 @@
                     var options = "";
                     result["categories"].forEach(function(val,index,arr) {
                         if (index == 0) {
-                            new_option = '<option value="' + val + '" selected="selected">' + val + '</option>';
+                            new_option = '<option value="' + val[0] + '" selected="selected">' + val[1] + '</option>';
                             options += new_option;
                         }
                         else {
-                            new_option = '<option value="' + val + '">' + val + '</option>';
+                            new_option = '<option value="' + val[0] + '">' + val[1] + '</option>';
                             options += new_option;
                         }
                     });
                     var category_list = document.getElementById("category-list");
                     category_list.innerHTML = options;
 
-                    var current_category_type = $('#category-list').children('option:selected').val();
+                    var current_category_type = $('#category-list').children('option:selected').text();
                     $.ajax({
                         type: "POST",
                         data: {category_type: current_category_type},
@@ -215,9 +222,9 @@
                         cache: false,
                         dataType: "json",
                         success: function (result) {
-                            var options = '<option value="select value" selected="selected">选择子类别</option>';
+                            var options = '<option value="select value" selected="selected">选择子类</option>';
                             result["subcategories"].forEach(function(val,index,arr) {
-                                new_option = '<option value="' + val + '">' + val + '</option>';
+                                new_option = '<option value="' + val[0] + '">' + val[1] + '</option>';
                                 options += new_option;
                             });
                             var sub_category_list = document.getElementById("sub-category-list");
@@ -229,7 +236,7 @@
         });
 
         $('#category-list').change(function(){
-            var current_category_type = $(this).children('option:selected').val();
+            var current_category_type = $(this).children('option:selected').text();
             $.ajax({
                 type: "POST",
                 data: {category_type: current_category_type},
@@ -237,9 +244,9 @@
                 cache: false,
                 dataType: "json",
                 success: function (result) {
-                    var options = '<option value="select value" selected="selected">选择子类别</option>';
+                    var options = '<option value="select value" selected="selected">选择子类</option>';
                     result["subcategories"].forEach(function(val,index,arr) {
-                        new_option = '<option value="' + val + '">' + val + '</option>';
+                        new_option = '<option value="' + val[0] + '">' + val[1] + '</option>';
                         options += new_option;
                     });
                     var sub_category_list = document.getElementById("sub-category-list");
