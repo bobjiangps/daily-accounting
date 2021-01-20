@@ -14,11 +14,29 @@ def index(request):
     history_records = HistoryRecord.objects.filter(time_of_occurrence__year=today.year, time_of_occurrence__month=today.month).order_by("-time_of_occurrence")
     income = 0
     expense = 0
+    day_has_record = []
+    current_month_records = {}
+    day_income_expense = {}
     for hr in history_records:
         if hr.category.category_type.lower() == "expense":
             expense -= hr.amount
         elif hr.category.category_type.lower() == "income":
             income += hr.amount
+        day_occur = hr.time_of_occurrence.strftime("%Y-%m-%d %A")
+        if day_occur not in day_has_record:
+            day_has_record.append(day_occur)
+            current_month_records[day_occur] = [hr]
+            day_income_expense[day_occur] = {"income": 0, "expense": 0}
+            if hr.category.category_type.lower() == "expense":
+                day_income_expense[day_occur]["expense"] += hr.amount
+            elif hr.category.category_type.lower() == "income":
+                day_income_expense[day_occur]["income"] += hr.amount
+        else:
+            current_month_records[day_occur].append(hr)
+            if hr.category.category_type.lower() == "expense":
+                day_income_expense[day_occur]["expense"] += hr.amount
+            elif hr.category.category_type.lower() == "income":
+                day_income_expense[day_occur]["income"] += hr.amount
     context = {
         'accounts': all_accounts,
         'currencies': currencies,
@@ -26,7 +44,9 @@ def index(request):
         'history_records': history_records,
         'current_month_income': income,
         'current_month_expense': expense,
-        'surplus': income + expense
+        'surplus': income + expense,
+        'current_month_records': current_month_records,
+        'day_income_expense': day_income_expense
                }
     return render(request, 'accounting/index.html', context)
 

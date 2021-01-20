@@ -119,9 +119,38 @@
                         <br>
                         <h5>当月账单列表</h5>
                         <hr width="90%" class="main-separator"/>
-                        {% for hr in history_records %}
-                        <div>{{ hr.time_of_occurrence }} - {{ hr.account }} - {{ hr.category }} - {{ hr.amount }} - {{ hr.comment }}</div>
-                        <br>
+                        {% for day, records in current_month_records.items %}
+                        <div class="card" style="margin: 0px 20px 10px 20px;">
+                            <div class="card-header" style="font-size: 80%;">
+                                <div style="float: left;">{{ day }}</div>
+                                {% load filter_dict %}
+                                <div style="float: right;">
+                                    收入:{{ day_income_expense|get_dict_value:day|get_dict_value:'income' }} | 支出:{{ day_income_expense|get_dict_value:day|get_dict_value:'expense' }}
+                                </div>
+                            </div>
+                            <ul class="list-group list-group-flush">
+                                {% for hr in records %}
+<!--                                <li class="list-group-item">{{ hr.time_of_occurrence }} - {{ hr.account }} - {{ hr.category }} - {{ hr.amount }} - {{ hr.comment }}</li>-->
+                                <li class="list-group-item">
+                                    {% if hr.sub_category %}
+                                    <div style="float: left;">{{ hr.category }} - {{ hr.sub_category }}</div>
+                                    {% else %}
+                                    <div style="float: left;">{{ hr.category }}</div>
+                                    {% endif %}
+                                    {% if hr.category.category_type == 'Income' %}
+                                    <div style="float: right; color: green;">{{ hr.amount }}</div>
+                                    {% else %}
+                                    <div style="float: right; color: red;">{{ hr.amount }}</div>
+                                    {% endif %}
+                                    <br>
+                                    {% if hr.comment %}
+                                    <div style="float: left; font-size: 80%; color: gray;">{{ hr.comment }}</div>
+                                    {% endif %}
+                                    <div style="float: right; font-size: 80%; color: gray;">{{ hr.account }}</div>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                         {% endfor %}
                     </div>
                 </div>
