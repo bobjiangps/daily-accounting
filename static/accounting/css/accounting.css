@@ -9,3 +9,16 @@
 #account-overview {
   margin: 0px 0px 20px 0px;
 }
+
+.tab-content>.tab-pane {
+  height: 1px;
+  overflow: hidden;
+  display: block;
+ visibility: hidden;
+}
+
+.tab-content>.active {
+  height: auto;
+  overflow: auto;
+  visibility: visible;
+}
