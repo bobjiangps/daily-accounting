@@ -116,12 +116,12 @@
                                 </div>
                             </div>
                         </form>
-                        <br>
+                        <p></p>
                         <h5>当月账单列表</h5>
                         <hr width="90%" class="main-separator"/>
                         {% for day, records in current_month_records.items %}
-                        <div class="card" style="margin: 0px 20px 10px 20px;">
-                            <div class="card-header" style="font-size: 80%;">
+                        <div class="card" style="margin: 0px 5px 10px 5px;">
+                            <div class="card-header">
                                 <div style="float: left;">{{ day }}</div>
                                 {% load filter_dict %}
                                 <div style="float: right;">
@@ -130,7 +130,6 @@
                             </div>
                             <ul class="list-group list-group-flush">
                                 {% for hr in records %}
-<!--                                <li class="list-group-item">{{ hr.time_of_occurrence }} - {{ hr.account }} - {{ hr.category }} - {{ hr.amount }} - {{ hr.comment }}</li>-->
                                 <li class="list-group-item">
                                     {% if hr.sub_category %}
                                     <div style="float: left;">{{ hr.category }} - {{ hr.sub_category }}</div>
