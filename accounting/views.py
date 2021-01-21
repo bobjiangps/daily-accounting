@@ -151,9 +151,9 @@ def retrieve_current_month_income_expense(request):
         days = [datetime.date(year, month, day).strftime("%Y-%m-%d") for day in range(1, month_has_days+1)]
         days_income = []
         days_expense = []
-        monthly_history_records = HistoryRecord.objects.filter(time_of_occurrence__year=year, time_of_occurrence__month=month).order_by("time_of_occurrence")
+        month_history_records = HistoryRecord.objects.filter(time_of_occurrence__year=year, time_of_occurrence__month=month).order_by("time_of_occurrence")
         for day in days:
-            day_history_records = monthly_history_records.filter(time_of_occurrence__day=int(day.split("-")[-1]))
+            day_history_records = month_history_records.filter(time_of_occurrence__day=int(day.split("-")[-1]))
             day_income = 0
             day_expense = 0
             for hr in day_history_records:
