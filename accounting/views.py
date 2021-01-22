@@ -185,3 +185,46 @@ def retrieve_current_month_income_expense(request):
                              "month_category_expense": list(month_category_expense.values())})
     else:
         return JsonResponse({"error": "unauthenticated"})
+
+
+def retrieve_current_year_income_expense(request):
+    if request.user.is_authenticated:
+        today = datetime.date.today()
+        year = today.year
+        months = [i for i in range(1, 13)]
+        months_income = []
+        months_expense = []
+        category_names = []
+        year_category_income = {}
+        year_category_expense = {}
+        year_history_records = HistoryRecord.objects.filter(time_of_occurrence__year=year).order_by("time_of_occurrence")
+        for month in months:
+            month_history_records = year_history_records.filter(time_of_occurrence__month=month)
+            month_income = 0
+            month_expense = 0
+            for hr in month_history_records:
+                hr_category = hr.category
+                if hr_category.category_type.lower() == "expense":
+                    month_expense += hr.amount
+                    if hr_category.name not in category_names:
+                        category_names.append(hr_category.name)
+                        year_category_expense[hr_category.name] = {"value": hr.amount, "name": hr_category.name}
+                    else:
+                        year_category_expense[hr_category.name]["value"] += hr.amount
+                elif hr_category.category_type.lower() == "income":
+                    month_income += hr.amount
+                    if hr_category.name not in category_names:
+                        category_names.append(hr_category.name)
+                        year_category_income[hr_category.name] = {"value": hr.amount, "name": hr_category.name}
+                    else:
+                        year_category_income[hr_category.name]["value"] += hr.amount
+            months_income.append(month_income)
+            months_expense.append(month_expense)
+        return JsonResponse({"months": months,
+                             "months_income": months_income,
+                             "months_expense": months_expense,
+                             "year_category_names": category_names,
+                             "year_category_income": list(year_category_income.values()),
+                             "year_category_expense": list(year_category_expense.values())})
+    else:
+        return JsonResponse({"error": "unauthenticated"})
