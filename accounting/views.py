@@ -151,18 +151,37 @@ def retrieve_current_month_income_expense(request):
         days = [datetime.date(year, month, day).strftime("%Y-%m-%d") for day in range(1, month_has_days+1)]
         days_income = []
         days_expense = []
+        category_names = []
+        month_category_income = {}
+        month_category_expense = {}
         month_history_records = HistoryRecord.objects.filter(time_of_occurrence__year=year, time_of_occurrence__month=month).order_by("time_of_occurrence")
         for day in days:
             day_history_records = month_history_records.filter(time_of_occurrence__day=int(day.split("-")[-1]))
             day_income = 0
             day_expense = 0
             for hr in day_history_records:
-                if hr.category.category_type.lower() == "expense":
+                hr_category = hr.category
+                if hr_category.category_type.lower() == "expense":
                     day_expense += hr.amount
-                elif hr.category.category_type.lower() == "income":
+                    if hr_category.name not in category_names:
+                        category_names.append(hr_category.name)
+                        month_category_expense[hr_category.name] = {"value": hr.amount, "name": hr_category.name}
+                    else:
+                        month_category_expense[hr_category.name]["value"] += hr.amount
+                elif hr_category.category_type.lower() == "income":
                     day_income += hr.amount
+                    if hr_category.name not in category_names:
+                        category_names.append(hr_category.name)
+                        month_category_income[hr_category.name] = {"value": hr.amount, "name": hr_category.name}
+                    else:
+                        month_category_income[hr_category.name]["value"] += hr.amount
             days_income.append(day_income)
             days_expense.append(day_expense)
-        return JsonResponse({"days": days, "days_income": days_income, "days_expense": days_expense})
+        return JsonResponse({"days": days,
+                             "days_income": days_income,
+                             "days_expense": days_expense,
+                             "month_category_names": category_names,
+                             "month_category_income": list(month_category_income.values()),
+                             "month_category_expense": list(month_category_expense.values())})
     else:
         return JsonResponse({"error": "unauthenticated"})
