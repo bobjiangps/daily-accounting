@@ -156,7 +156,24 @@
             </div>
             <div id="charts" class="container-fluid tab-pane"><br>
                 <div class="row" align="center">
-                    <div class="col-lg-6 mb-6" id="month-charts">
+                    <div class="col-lg-4 mb-4">
+                    </div>
+                    <div class="col-lg-4 mb-4" align="center">
+                        <div class="input-group">
+                            <select class="custom-select" id="available-years">
+                            </select>
+                            <select class="custom-select" id="available-months">
+                            </select>
+                            <div class="input-group-append">
+                                <button id="show-charts" class="btn btn-outline-info my-2 my-sm-0" type="submit">筛选</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 mb-4">
+                    </div>
+                </div>
+                <div class="row" align="center">
+                    <div class="col-lg-6 mb-6">
                         <div id="month-bar-chart" style="width:100%; height: 400px; padding: 10px 0px;"></div>
                         <div id="month-pie-chart" style="width:100%; height: 400px;"></div>
                     </div>
@@ -336,6 +353,25 @@
 
         $('#charts-nav').click(function(){
             $("#top-container").attr("class", "container-fluid");
+
+            $.ajax({
+                type: "GET",
+                url: "{% url 'retrieve_year_has_data' %}",
+                cache: false,
+                dataType: "json",
+                success: function (result) {
+                    var options = '<option value="select value" selected="selected">选择年份</option>';
+                    result["years"].forEach(function(val,index,arr) {
+                        new_option = '<option value="' + val + '">' + val + '</option>';
+                        options += new_option;
+                    });
+                    var year_list = document.getElementById("available-years");
+                    year_list.innerHTML = options;
+                    var month_options = '<option value="select value" selected="selected">选择月份</option>';
+                    var month_list = document.getElementById("available-months");
+                    month_list.innerHTML = month_options;
+                }
+            });
 
             var monthBarChart = echarts.init(document.getElementById('month-bar-chart'));
             var monthBarOption = {
@@ -609,6 +645,72 @@
                     yearPieOption.series[1].data = result["year_category_expense"];
                     yearPieChart.setOption(yearPieOption);
                 }
+            });
+
+            $('#available-years').change(function(){
+                var current_selected_year = $(this).children('option:selected').text();
+                $.ajax({
+                    type: "POST",
+                    data: {year: current_selected_year},
+                    url: "{% url 'retrieve_month_has_data' %}",
+                    cache: false,
+                    dataType: "json",
+                    success: function (result) {
+                        var options = '<option value="select value" selected="selected">选择月份</option>';
+                        result["months"].forEach(function(val,index,arr) {
+                            new_option = '<option value="' + val + '">' + val + '</option>';
+                            options += new_option;
+                        });
+                        var month_list = document.getElementById("available-months");
+                        month_list.innerHTML = options;
+                    }
+                });
+            });
+
+            $('#show-charts').click(function(){
+                var selected_year = $('#available-years').children('option:selected').text();
+                var selected_month = $('#available-months').children('option:selected').text();
+                var re = /^[0-9]+.?[0-9]*/;
+            　　 if (re.test(selected_year) && re.test(selected_month)) {
+                    $.ajax({
+                        type: "POST",
+                        data: {year: selected_year, month: selected_month},
+                        url: "{% url 'retrieve_current_month_income_expense' %}",
+                        cache: false,
+                        dataType: "json",
+                        success: function (result) {
+                            monthBarOption.xAxis.data = result["days"];
+                            monthBarOption.series[0].data = result["days_expense"];
+                            monthBarOption.series[1].data = result["days_income"];
+                            monthBarChart.setOption(monthBarOption);
+                            monthPieOption.legend.data = result["month_category_names"];
+                            monthPieOption.series[0].data = result["month_category_income"];
+                            monthPieOption.series[1].data = result["month_category_expense"];
+                            monthPieChart.setOption(monthPieOption);
+                        }
+                    });
+
+                    $.ajax({
+                        type: "POST",
+                        data: {year: selected_year},
+                        url: "{% url 'retrieve_current_year_income_expense' %}",
+                        cache: false,
+                        dataType: "json",
+                        success: function (result) {
+                            yearBarOption.xAxis.data = result["months"];
+                            yearBarOption.series[0].data = result["months_expense"];
+                            yearBarOption.series[1].data = result["months_income"];
+                            yearBarChart.setOption(yearBarOption);
+                            yearPieOption.legend.data = result["year_category_names"];
+                            yearPieOption.series[0].data = result["year_category_income"];
+                            yearPieOption.series[1].data = result["year_category_expense"];
+                            yearPieChart.setOption(yearPieOption);
+                        }
+                    });
+            　　 }
+                else {
+            　　　　 alert("请选择年和月!");
+            　　 }
             });
 
         });

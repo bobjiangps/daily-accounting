@@ -144,9 +144,15 @@ def record_income_expense(request):
 
 def retrieve_current_month_income_expense(request):
     if request.user.is_authenticated:
-        today = datetime.date.today()
-        year = today.year
-        month = today.month
+        post_year = request.POST.get('year')
+        post_month = request.POST.get('month')
+        if post_year and post_month:
+            year = int(post_year)
+            month = int(post_month)
+        else:
+            today = datetime.date.today()
+            year = today.year
+            month = today.month
         month_has_days = calendar.monthrange(year, month)[1]
         days = [datetime.date(year, month, day).strftime("%Y-%m-%d") for day in range(1, month_has_days+1)]
         days_income = []
@@ -189,8 +195,12 @@ def retrieve_current_month_income_expense(request):
 
 def retrieve_current_year_income_expense(request):
     if request.user.is_authenticated:
-        today = datetime.date.today()
-        year = today.year
+        post_year = request.POST.get('year')
+        if post_year:
+            year = int(post_year)
+        else:
+            today = datetime.date.today()
+            year = today.year
         months = [i for i in range(1, 13)]
         months_income = []
         months_expense = []
@@ -226,5 +236,27 @@ def retrieve_current_year_income_expense(request):
                              "year_category_names": category_names,
                              "year_category_income": list(year_category_income.values()),
                              "year_category_expense": list(year_category_expense.values())})
+    else:
+        return JsonResponse({"error": "unauthenticated"})
+
+
+def retrieve_year_has_data(request):
+    if request.user.is_authenticated:
+        hr_first = HistoryRecord.objects.order_by("time_of_occurrence").first()
+        hr_last = HistoryRecord.objects.order_by("time_of_occurrence").last()
+        year_list = [y for y in range(hr_last.time_of_occurrence.year, hr_first.time_of_occurrence.year-1, -1)]
+        return JsonResponse({"years": year_list})
+    else:
+        return JsonResponse({"error": "unauthenticated"})
+
+
+def retrieve_month_has_data(request):
+    if request.user.is_authenticated:
+        year = request.POST.get('year')
+        hr = HistoryRecord.objects.filter(time_of_occurrence__year=year).order_by("time_of_occurrence")
+        hr_first = hr.first()
+        hr_last = hr.last()
+        month_list = [m for m in range(hr_last.time_of_occurrence.month, hr_first.time_of_occurrence.month-1, -1)]
+        return JsonResponse({"months": month_list})
     else:
         return JsonResponse({"error": "unauthenticated"})
