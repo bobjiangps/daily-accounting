@@ -30,12 +30,12 @@ class Account(models.Model):
 
 class Category(models.Model):
     CATEGORY_TYPES = (
-       ("income", "收入"),
-       ("expense", "支出")
+        ("expense", "支出"),
+        ("income", "收入"),
     )
     name = models.CharField(max_length=100)
     icon = models.CharField(max_length=100)
-    category_type = models.CharField(choices=CATEGORY_TYPES, default=CATEGORY_TYPES[1][0], max_length=100)
+    category_type = models.CharField(choices=CATEGORY_TYPES, default=CATEGORY_TYPES[0][0], max_length=100)
 
     def __str__(self):
         return self.name
