@@ -136,7 +136,7 @@
                                     {% else %}
                                     <div style="float: left;">{{ hr.category }}</div>
                                     {% endif %}
-                                    {% if hr.category.category_type == 'Income' %}
+                                    {% if hr.category.category_type == 'income' %}
                                     <div style="float: right; color: green;">{{ hr.amount }}</div>
                                     {% else %}
                                     <div style="float: right; color: red;">{{ hr.amount }}</div>
@@ -157,6 +157,16 @@
             <div id="charts" class="container-fluid tab-pane"><br>
                 <div class="row" align="center">
                     <div class="col-lg-4 mb-4">
+                        <div class="row">
+                            <div class="col" align="center">
+                                <span>月总收入</span>
+                                <h6 id="month-total-income">(元)</h6>
+                            </div>
+                            <div class="col" align="center">
+                                <span>月总支出</span>
+                                <h6 id="month-total-expense">(元)</h6>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-lg-4 mb-4" align="center">
                         <div class="input-group">
@@ -170,6 +180,16 @@
                         </div>
                     </div>
                     <div class="col-lg-4 mb-4">
+                        <div class="row">
+                            <div class="col" align="center">
+                                <span>年总收入</span>
+                                <h6 id="year-total-income">(元)</h6>
+                            </div>
+                            <div class="col" align="center">
+                                <span>年总支出</span>
+                                <h6 id="year-total-expense">(元)</h6>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="row" align="center">
@@ -619,6 +639,8 @@
                 cache: false,
                 dataType: "json",
                 success: function (result) {
+                    $("#month-total-income").text(result["month_total_income"]);
+                    $("#month-total-expense").text("-"+result["month_total_expense"]);
                     monthBarOption.xAxis.data = result["days"];
                     monthBarOption.series[0].data = result["days_expense"];
                     monthBarOption.series[1].data = result["days_income"];
@@ -636,6 +658,8 @@
                 cache: false,
                 dataType: "json",
                 success: function (result) {
+                    $("#year-total-income").text(result["year_total_income"]);
+                    $("#year-total-expense").text("-"+result["year_total_expense"]);
                     yearBarOption.xAxis.data = result["months"];
                     yearBarOption.series[0].data = result["months_expense"];
                     yearBarOption.series[1].data = result["months_income"];
@@ -679,6 +703,8 @@
                         cache: false,
                         dataType: "json",
                         success: function (result) {
+                            $("#month-total-income").text(result["month_total_income"]);
+                            $("#month-total-expense").text("-"+result["month_total_expense"]);
                             monthBarOption.xAxis.data = result["days"];
                             monthBarOption.series[0].data = result["days_expense"];
                             monthBarOption.series[1].data = result["days_income"];
@@ -697,6 +723,8 @@
                         cache: false,
                         dataType: "json",
                         success: function (result) {
+                            $("#year-total-income").text(result["year_total_income"]);
+                            $("#year-total-expense").text("-"+result["year_total_expense"]);
                             yearBarOption.xAxis.data = result["months"];
                             yearBarOption.series[0].data = result["months_expense"];
                             yearBarOption.series[1].data = result["months_income"];

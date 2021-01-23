@@ -160,6 +160,8 @@ def retrieve_current_month_income_expense(request):
         category_names = []
         month_category_income = {}
         month_category_expense = {}
+        month_total_income = 0
+        month_total_expense = 0
         month_history_records = HistoryRecord.objects.filter(time_of_occurrence__year=year, time_of_occurrence__month=month).order_by("time_of_occurrence")
         for day in days:
             day_history_records = month_history_records.filter(time_of_occurrence__day=int(day.split("-")[-1]))
@@ -169,6 +171,7 @@ def retrieve_current_month_income_expense(request):
                 hr_category = hr.category
                 if hr_category.category_type.lower() == "expense":
                     day_expense += hr.amount
+                    month_total_expense += hr.amount
                     if hr_category.name not in category_names:
                         category_names.append(hr_category.name)
                         month_category_expense[hr_category.name] = {"value": hr.amount, "name": hr_category.name}
@@ -176,6 +179,7 @@ def retrieve_current_month_income_expense(request):
                         month_category_expense[hr_category.name]["value"] += hr.amount
                 elif hr_category.category_type.lower() == "income":
                     day_income += hr.amount
+                    month_total_income += hr.amount
                     if hr_category.name not in category_names:
                         category_names.append(hr_category.name)
                         month_category_income[hr_category.name] = {"value": hr.amount, "name": hr_category.name}
@@ -186,6 +190,8 @@ def retrieve_current_month_income_expense(request):
         return JsonResponse({"days": days,
                              "days_income": days_income,
                              "days_expense": days_expense,
+                             "month_total_income": month_total_income,
+                             "month_total_expense": month_total_expense,
                              "month_category_names": category_names,
                              "month_category_income": list(month_category_income.values()),
                              "month_category_expense": list(month_category_expense.values())})
@@ -207,6 +213,8 @@ def retrieve_current_year_income_expense(request):
         category_names = []
         year_category_income = {}
         year_category_expense = {}
+        year_total_income = 0
+        year_total_expense = 0
         year_history_records = HistoryRecord.objects.filter(time_of_occurrence__year=year).order_by("time_of_occurrence")
         for month in months:
             month_history_records = year_history_records.filter(time_of_occurrence__month=month)
@@ -216,6 +224,7 @@ def retrieve_current_year_income_expense(request):
                 hr_category = hr.category
                 if hr_category.category_type.lower() == "expense":
                     month_expense += hr.amount
+                    year_total_expense += hr.amount
                     if hr_category.name not in category_names:
                         category_names.append(hr_category.name)
                         year_category_expense[hr_category.name] = {"value": hr.amount, "name": hr_category.name}
@@ -223,6 +232,7 @@ def retrieve_current_year_income_expense(request):
                         year_category_expense[hr_category.name]["value"] += hr.amount
                 elif hr_category.category_type.lower() == "income":
                     month_income += hr.amount
+                    year_total_income += hr.amount
                     if hr_category.name not in category_names:
                         category_names.append(hr_category.name)
                         year_category_income[hr_category.name] = {"value": hr.amount, "name": hr_category.name}
@@ -233,6 +243,8 @@ def retrieve_current_year_income_expense(request):
         return JsonResponse({"months": months,
                              "months_income": months_income,
                              "months_expense": months_expense,
+                             "year_total_income": year_total_income,
+                             "year_total_expense": year_total_expense,
                              "year_category_names": category_names,
                              "year_category_income": list(year_category_income.values()),
                              "year_category_expense": list(year_category_expense.values())})
