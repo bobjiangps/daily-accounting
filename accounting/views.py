@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
+from django.db.models import Q
 from .models import *
 from .forms import HistoryRecordForm
 import datetime, calendar
@@ -270,5 +271,36 @@ def retrieve_month_has_data(request):
         hr_last = hr.last()
         month_list = [m for m in range(hr_last.time_of_occurrence.month, hr_first.time_of_occurrence.month-1, -1)]
         return JsonResponse({"months": month_list})
+    else:
+        return JsonResponse({"error": "unauthenticated"})
+
+
+def search_record(request):
+    if request.user.is_authenticated:
+        keyword = request.POST.get('keyword')
+        categories = Category.objects.filter(name__icontains=keyword)
+        subcategories = SubCategory.objects.filter(name__icontains=keyword)
+        hrs = HistoryRecord.objects.filter(Q(category__in=categories) | Q(sub_category__in=subcategories) | Q(comment__icontains=keyword) | Q(amount__icontains=keyword))
+        records = []
+        for hr in hrs:
+            day_occur = hr.time_of_occurrence.strftime("%Y-%m-%d %A")
+            if hr.sub_category:
+                sub_category = hr.sub_category.name
+            else:
+                sub_category = "no sub category"
+            if hr.comment:
+                comment = hr.comment
+            else:
+                comment = ""
+            records.append({
+                "day": day_occur,
+                "category": hr.category.name,
+                "subcategory": sub_category,
+                "amount": hr.amount,
+                "comment": comment,
+                "account": hr.account.name,
+                "ie_type": hr.category.category_type.lower()
+            })
+        return JsonResponse({"records": records})
     else:
         return JsonResponse({"error": "unauthenticated"})

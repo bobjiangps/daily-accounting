@@ -61,6 +61,13 @@
                                 {% endfor %}
                             </ul>
                         </div>
+                        <div class="form-inline my-2 my-lg-0">
+                            <div name="search-elements" style="margin: 0px auto;">
+                                <input class="form-control mr-sm-2" type="search" id="search-keyword" placeholder="请输入内容">
+                                <button class="btn btn-info my-2 my-sm-0" id="search-record" type="submit"><i class="fa fa-search" aria-hidden="true">搜索账单</i></button>
+                                <a class="btn btn-info my-2 my-sm-0" href="/accounting" >回到主页</a>
+                            </div>
+                        </div>
                         <hr width="90%" class="main-separator"/>
                     </div>
                     <div class="col-lg-6 mb-6" id="history-records-overview" align="center">
@@ -119,38 +126,40 @@
                         <p></p>
                         <h5>当月账单列表</h5>
                         <hr width="90%" class="main-separator"/>
-                        {% for day, records in current_month_records.items %}
-                        <div class="card" style="margin: 0px 5px 10px 5px;">
-                            <div class="card-header">
-                                <div style="float: left;">{{ day }}</div>
-                                {% load filter_dict %}
-                                <div style="float: right;">
-                                    收入:{{ day_income_expense|get_dict_value:day|get_dict_value:'income' }} | 支出:{{ day_income_expense|get_dict_value:day|get_dict_value:'expense' }}
+                        <div id="record-list">
+                            {% for day, records in current_month_records.items %}
+                            <div class="card" style="margin: 0px 5px 10px 5px;">
+                                <div class="card-header">
+                                    <div style="float: left;">{{ day }}</div>
+                                    {% load filter_dict %}
+                                    <div style="float: right;">
+                                        收入:{{ day_income_expense|get_dict_value:day|get_dict_value:'income' }} | 支出:{{ day_income_expense|get_dict_value:day|get_dict_value:'expense' }}
+                                    </div>
                                 </div>
+                                <ul class="list-group list-group-flush">
+                                    {% for hr in records %}
+                                    <li class="list-group-item">
+                                        {% if hr.sub_category %}
+                                        <div style="float: left;">{{ hr.category }} - {{ hr.sub_category }}</div>
+                                        {% else %}
+                                        <div style="float: left;">{{ hr.category }}</div>
+                                        {% endif %}
+                                        {% if hr.category.category_type == 'income' %}
+                                        <div style="float: right; color: green;">{{ hr.amount }}</div>
+                                        {% else %}
+                                        <div style="float: right; color: red;">{{ hr.amount }}</div>
+                                        {% endif %}
+                                        <br>
+                                        {% if hr.comment %}
+                                        <div style="float: left; font-size: 80%; color: gray;">{{ hr.comment }}</div>
+                                        {% endif %}
+                                        <div style="float: right; font-size: 80%; color: gray;">{{ hr.account }}</div>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
                             </div>
-                            <ul class="list-group list-group-flush">
-                                {% for hr in records %}
-                                <li class="list-group-item">
-                                    {% if hr.sub_category %}
-                                    <div style="float: left;">{{ hr.category }} - {{ hr.sub_category }}</div>
-                                    {% else %}
-                                    <div style="float: left;">{{ hr.category }}</div>
-                                    {% endif %}
-                                    {% if hr.category.category_type == 'income' %}
-                                    <div style="float: right; color: green;">{{ hr.amount }}</div>
-                                    {% else %}
-                                    <div style="float: right; color: red;">{{ hr.amount }}</div>
-                                    {% endif %}
-                                    <br>
-                                    {% if hr.comment %}
-                                    <div style="float: left; font-size: 80%; color: gray;">{{ hr.comment }}</div>
-                                    {% endif %}
-                                    <div style="float: right; font-size: 80%; color: gray;">{{ hr.account }}</div>
-                                </li>
-                                {% endfor %}
-                            </ul>
+                            {% endfor %}
                         </div>
-                        {% endfor %}
                     </div>
                 </div>
             </div>
@@ -354,6 +363,49 @@
                     });
                     var sub_category_list = document.getElementById("sub-category-list");
                     sub_category_list.innerHTML = options;
+                }
+            });
+        });
+
+        $('#search-record').click(function(){
+            var search_keyword = $("#search-keyword").val();
+            $.ajax({
+                type: "POST",
+                data: {keyword: search_keyword},
+                url: "{% url 'search_record' %}",
+                cache: false,
+                dataType: "json",
+                success: function (result) {
+                    var cards = '';
+                    if (result["records"].length > 0) {
+                        var cards = '';
+                    }
+                    else {
+                        var cards = '<h5>搜索无结果</h5>';
+                    }
+                    result["records"].forEach(function(val,index,arr) {
+                        var card_prefix = '<div class="card" style="margin: 0px 5px 10px 5px;">';
+                        var category_string = '';
+                        if (val['subcategory'] === 'no sub category') {
+                            category_string = val['category'];
+                        }
+                        else {
+                            category_string = val['category'] + ' - ' + val['subcategory'];
+                        }
+                        if (val['ie_type'] === 'income') {
+                            amount_string = '<div style="float: right; color: green;">' + val["amount"] + '</div><br>';
+                        }
+                        else {
+                            amount_string = '<div style="float: right; color: red;">' + val["amount"] + '</div><br>';
+                        }
+                        var comment_string = '<div style="float: left; font-size: 80%; color: gray;">' + val["comment"] + '</div>';
+                        var account_string = '<div style="float: right; font-size: 80%; color: gray;">' + val["account"] + '</div>';
+                        card_header = '<div class="card-header"><div style="float: left;">'+val['day']+'</div></div>';
+                        list_group = '<ul class="list-group list-group-flush"><li class="list-group-item"><div style="float: left;">'+category_string+'</div>'+amount_string+comment_string+account_string+'</li></ul>';
+                        cards += card_prefix + card_header + list_group + '</div>';
+                    });
+                    var record_list = document.getElementById("record-list");
+                    record_list.innerHTML = cards;
                 }
             });
         });
