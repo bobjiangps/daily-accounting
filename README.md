@@ -13,7 +13,10 @@ environment: python 3, django 3, bootstrap 4, echarts 5, mysql, uwsgi, nginx.
 * [用Django做一个简单的记账网站(七)添加日期时间选择器](https://www.byincd.com/bobjiang/article-01175/)
 * [用Django做一个简单的记账网站(八)提交表单](https://www.byincd.com/bobjiang/article-01176/)
 * [用Django做一个简单的记账网站(九)自定义模板过滤器](https://www.byincd.com/bobjiang/article-01177/)
-* ...
+* [用Django做一个简单的记账网站(十)生成图表](https://www.byincd.com/bobjiang/article-01179/)
+* [用Django做一个简单的记账网站(十一)部署到服务器](https://www.byincd.com/bobjiang/article-01180/)
 
 
-#### Continue adding...
+![Image text](https://www.byincd.com/media/upload/Bo/2021/01/26/deploy_history_record.png)
+
+![Image text](https://www.byincd.com/media/upload/Bo/2021/01/26/deploy_charts.png)
