@@ -69,3 +69,17 @@ class HistoryRecord(models.Model):
 
     class Meta:
         ordering = ['-time_of_occurrence']
+
+
+class TransferRecord(models.Model):
+    from_account = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, default=1, related_name='from_account')
+    to_account = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, default=2, related_name='to_account')
+    time_of_occurrence = models.DateTimeField(default=timezone.now)
+    currency = models.ForeignKey(Currency, on_delete=models.SET_NULL, null=True, default=1)
+    amount = models.DecimalField(max_digits=8, decimal_places=2)
+    comment = models.CharField(max_length=500, null=True, blank=True)
+    created_date = models.DateTimeField(default=timezone.now)
+    updated_date = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ['-time_of_occurrence']

@@ -68,6 +68,42 @@
                                 <a class="btn btn-info my-2 my-sm-0" href="/accounting" >回到主页</a>
                             </div>
                         </div>
+                        <hr width="90%" />
+                        <form action="{% url 'transfer_between_accounts' %}" method="post" class="transfer-record-form">
+                            {% csrf_token %}
+                            <div class="form-row">
+                                <div class="col-md-1"></div>
+                                <div class="col-md-3 mb-3">
+                                    <select class="custom-select" id="from-account-list" name="from_account">
+                                        {% for a in accounts %}
+                                        <option value="{{ a.id }}">{{ a.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <input type="text" oninput="value=value.replace(/[^\d.]/g,'')" name="amount" aria-label="Transfer Money Amount" placeholder="金额" class="form-control" required="">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <input type="text" name="comment" aria-label="Comment" placeholder="备注" class="form-control">
+                                </div>
+                                <div class="col-md-1"></div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-md-4 mb-3">
+                                    <input id="transfer-time-occurrence" name="time_of_occurrence" type="text" class="form-control">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <button type="submit" class="btn btn-info btn-block">转移到账户</button>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <select class="custom-select" id="to-account-list" name="to_account">
+                                        {% for a in accounts %}
+                                        <option value="{{ a.id }}">{{ a.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </form>
                         <hr width="90%" class="main-separator"/>
                     </div>
                     <div class="col-lg-6 mb-6" id="history-records-overview" align="center">
@@ -107,7 +143,7 @@
                                             {% endfor %}
                                             </select>
                                         </div>
-                                        <input type="text" name="amount" aria-label="Money Amount" placeholder="金额" class="form-control" required="">
+                                        <input type="text" oninput="value=value.replace(/[^\d.]/g,'')" name="amount" aria-label="Money Amount" placeholder="金额" class="form-control" required="">
                                     </div>
                                 </div>
                                 <div class="col-md-7 mb-3">
@@ -127,7 +163,7 @@
                         <h5>当月账单列表</h5>
                         <hr width="90%" class="main-separator"/>
                         <div id="record-list">
-                            {% for day, records in current_month_records.items %}
+                            {% for day in day_has_record %}
                             <div class="card" style="margin: 0px 5px 10px 5px;">
                                 <div class="card-header">
                                     <div style="float: left;">{{ day }}</div>
@@ -137,24 +173,36 @@
                                     </div>
                                 </div>
                                 <ul class="list-group list-group-flush">
-                                    {% for hr in records %}
-                                    <li class="list-group-item">
-                                        {% if hr.sub_category %}
-                                        <div style="float: left;">{{ hr.category }} - {{ hr.sub_category }}</div>
+                                    {% for r in current_month_records|get_dict_value:day %}
+                                        {% if r.category %}
+                                        <li class="list-group-item">
+                                            {% if r.sub_category %}
+                                            <div style="float: left;">{{ r.category }} - {{ r.sub_category }}</div>
+                                            {% else %}
+                                            <div style="float: left;">{{ r.category }}</div>
+                                            {% endif %}
+                                            {% if r.category.category_type == 'income' %}
+                                            <div style="float: right; color: green;">{{ r.amount }}</div>
+                                            {% else %}
+                                            <div style="float: right; color: red;">{{ r.amount }}</div>
+                                            {% endif %}
+                                            <br>
+                                            {% if r.comment %}
+                                            <div style="float: left; font-size: 80%; color: gray;">{{ r.comment }}</div>
+                                            {% endif %}
+                                            <div style="float: right; font-size: 80%; color: gray;">{{ r.account }}</div>
+                                        </li>
                                         {% else %}
-                                        <div style="float: left;">{{ hr.category }}</div>
+                                        <li class="list-group-item">
+                                            <div style="float: left;">{{ r.from_account }} -> {{ r.to_account }}</div>
+                                            <div style="float: right; color: blue;">{{ r.amount }}</div>
+                                            <br>
+                                            {% if r.comment %}
+                                            <div style="float: left; font-size: 80%; color: gray;">{{ r.comment }}</div>
+                                            {% endif %}
+                                            <div style="float: right; font-size: 80%; color: gray;">账户内转</div>
+                                        </li>
                                         {% endif %}
-                                        {% if hr.category.category_type == 'income' %}
-                                        <div style="float: right; color: green;">{{ hr.amount }}</div>
-                                        {% else %}
-                                        <div style="float: right; color: red;">{{ hr.amount }}</div>
-                                        {% endif %}
-                                        <br>
-                                        {% if hr.comment %}
-                                        <div style="float: left; font-size: 80%; color: gray;">{{ hr.comment }}</div>
-                                        {% endif %}
-                                        <div style="float: right; font-size: 80%; color: gray;">{{ hr.account }}</div>
-                                    </li>
                                     {% endfor %}
                                 </ul>
                             </div>
@@ -369,49 +417,59 @@
 
         $('#search-record').click(function(){
             var search_keyword = $("#search-keyword").val();
-            $.ajax({
-                type: "POST",
-                data: {keyword: search_keyword},
-                url: "{% url 'search_record' %}",
-                cache: false,
-                dataType: "json",
-                success: function (result) {
-                    var cards = '';
-                    if (result["records"].length > 0) {
+            if (!search_keyword) {
+                alert("搜索词不能为空");
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    data: {keyword: search_keyword},
+                    url: "{% url 'search_record' %}",
+                    cache: false,
+                    dataType: "json",
+                    success: function (result) {
                         var cards = '';
-                    }
-                    else {
-                        var cards = '<h5>搜索无结果</h5>';
-                    }
-                    result["records"].forEach(function(val,index,arr) {
-                        var card_prefix = '<div class="card" style="margin: 0px 5px 10px 5px;">';
-                        var category_string = '';
-                        if (val['subcategory'] === 'no sub category') {
-                            category_string = val['category'];
+                        if (result["records"].length > 0) {
+                            var cards = '';
                         }
                         else {
-                            category_string = val['category'] + ' - ' + val['subcategory'];
+                            var cards = '<h5>搜索无结果</h5>';
                         }
-                        if (val['ie_type'] === 'income') {
-                            amount_string = '<div style="float: right; color: green;">' + val["amount"] + '</div><br>';
-                        }
-                        else {
-                            amount_string = '<div style="float: right; color: red;">' + val["amount"] + '</div><br>';
-                        }
-                        var comment_string = '<div style="float: left; font-size: 80%; color: gray;">' + val["comment"] + '</div>';
-                        var account_string = '<div style="float: right; font-size: 80%; color: gray;">' + val["account"] + '</div>';
-                        card_header = '<div class="card-header"><div style="float: left;">'+val['day']+'</div></div>';
-                        list_group = '<ul class="list-group list-group-flush"><li class="list-group-item"><div style="float: left;">'+category_string+'</div>'+amount_string+comment_string+account_string+'</li></ul>';
-                        cards += card_prefix + card_header + list_group + '</div>';
-                    });
-                    var record_list = document.getElementById("record-list");
-                    record_list.innerHTML = cards;
-                }
-            });
+                        result["records"].forEach(function(val,index,arr) {
+                            var card_prefix = '<div class="card" style="margin: 0px 5px 10px 5px;">';
+                            var category_string = '';
+                            if (val['subcategory'] === 'no sub category') {
+                                category_string = val['category'];
+                            }
+                            else {
+                                category_string = val['category'] + ' - ' + val['subcategory'];
+                            }
+                            if (val['ie_type'] === 'income') {
+                                amount_string = '<div style="float: right; color: green;">' + val["amount"] + '</div><br>';
+                            }
+                            else {
+                                amount_string = '<div style="float: right; color: red;">' + val["amount"] + '</div><br>';
+                            }
+                            var comment_string = '<div style="float: left; font-size: 80%; color: gray;">' + val["comment"] + '</div>';
+                            var account_string = '<div style="float: right; font-size: 80%; color: gray;">' + val["account"] + '</div>';
+                            card_header = '<div class="card-header"><div style="float: left;">'+val['day']+'</div></div>';
+                            list_group = '<ul class="list-group list-group-flush"><li class="list-group-item"><div style="float: left;">'+category_string+'</div>'+amount_string+comment_string+account_string+'</li></ul>';
+                            cards += card_prefix + card_header + list_group + '</div>';
+                        });
+                        var record_list = document.getElementById("record-list");
+                        record_list.innerHTML = cards;
+                    }
+                });
+            }
         });
 
         $("#time-occurrence").attr("value", getCurrentDateFormat());
         $("#time-occurrence").datetimepicker( {
+            format:'Y-m-d H:i',
+        });
+
+        $("#transfer-time-occurrence").attr("value", getCurrentDateFormat());
+        $("#transfer-time-occurrence").datetimepicker( {
             format:'Y-m-d H:i',
         });
 
