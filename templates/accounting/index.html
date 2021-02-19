@@ -104,6 +104,20 @@
                                 </div>
                             </div>
                         </form>
+                        <hr width="90%" />
+                        <div class="form-row">
+                            <div class="col-md-4 mb-3">
+                                <select class="custom-select" id="years-filter">
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <select class="custom-select" id="months-filter">
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <button id="show-custom-record" class="btn btn-info btn-block" type="submit">按日期筛选</button>
+                            </div>
+                        </div>
                         <hr width="90%" class="main-separator"/>
                     </div>
                     <div class="col-lg-6 mb-6" id="history-records-overview" align="center">
@@ -349,6 +363,107 @@
                 var sub_category_list = document.getElementById("sub-category-list");
                 sub_category_list.innerHTML = options;
             }
+        });
+
+        $.ajax({
+            type: "GET",
+            url: "{% url 'retrieve_year_has_data' %}",
+            cache: false,
+            dataType: "json",
+            success: function (result) {
+                var options = '<option value="select value" selected="selected">选择年份</option>';
+                result["years"].forEach(function(val,index,arr) {
+                    new_option = '<option value="' + val + '">' + val + '</option>';
+                    options += new_option;
+                });
+                var year_list = document.getElementById("years-filter");
+                year_list.innerHTML = options;
+                var month_options = '<option value="select value" selected="selected">选择月份</option>';
+                var month_list = document.getElementById("months-filter");
+                month_list.innerHTML = month_options;
+            }
+        });
+        $('#years-filter').change(function(){
+            var current_selected_year = $(this).children('option:selected').text();
+            $.ajax({
+                type: "POST",
+                data: {year: current_selected_year},
+                url: "{% url 'retrieve_month_has_data' %}",
+                cache: false,
+                dataType: "json",
+                success: function (result) {
+                    var options = '<option value="select value" selected="selected">选择月份</option>';
+                    result["months"].forEach(function(val,index,arr) {
+                        new_option = '<option value="' + val + '">' + val + '</option>';
+                        options += new_option;
+                    });
+                    var month_list = document.getElementById("months-filter");
+                    month_list.innerHTML = options;
+                }
+            });
+        });
+
+        $('#show-custom-record').click(function(){
+            var selected_year = $('#years-filter').children('option:selected').text();
+            var selected_month = $('#months-filter').children('option:selected').text();
+            var re = /^[0-9]+.?[0-9]*/;
+        　　 if (re.test(selected_year) && re.test(selected_month)) {
+                $.ajax({
+                    type: "POST",
+                    data: {year: selected_year, month: selected_month},
+                    url: "{% url 'filter_record_by_date' %}",
+                    cache: false,
+                    dataType: "json",
+                    success: function (result) {
+                        var cards = '';
+                        if (Object.keys(result["records"]).length > 0) {
+                            var cards = '';
+                        }
+                        else {
+                            var cards = '<h5>搜索无结果</h5>';
+                        }
+                        for (key in result["records"]) {
+                            var card_prefix = '<div class="card" style="margin: 0px 5px 10px 5px;">';
+                            var card_header = '<div class="card-header"><div style="float: left;">'+ key +'</div></div>';
+                            var current_item = '';
+                            result["records"][key].forEach(function(val,index,arr) {
+                                if (val["record_type"] === "income_expense") {
+                                    var category_string = '';
+                                    if (val['subcategory'] === 'no sub category') {
+                                        category_string = val['category'];
+                                    }
+                                    else {
+                                        category_string = val['category'] + ' - ' + val['subcategory'];
+                                    }
+                                    if (val['ie_type'] === 'income') {
+                                        amount_string = '<div style="float: right; color: green;">' + val["amount"] + '</div><br>';
+                                    }
+                                    else {
+                                        amount_string = '<div style="float: right; color: red;">' + val["amount"] + '</div><br>';
+                                    }
+                                    var comment_string = '<div style="float: left; font-size: 80%; color: gray;">' + val["comment"] + '</div>';
+                                    var account_string = '<div style="float: right; font-size: 80%; color: gray;">' + val["account"] + '</div>';
+                                    current_item += '<li class="list-group-item"><div style="float: left;">'+category_string+'</div>'+amount_string+comment_string+account_string+'</li>';
+                                }
+                                else {
+                                    var transfer_string = '<div style="float: left;">' + val["from_account"] + ' -> ' + val["to_account"] + '</div>';
+                                    var amount_string = '<div style="float: right; color: blue;">' + val["amount"] + '</div><br>';
+                                    var comment_string = '<div style="float: left; font-size: 80%; color: gray;">' + val["comment"] + '</div>';
+                                    var account_string = '<div style="float: right; font-size: 80%; color: gray;">账户内转</div>';
+                                    current_item += '<li class="list-group-item">' + transfer_string + amount_string + comment_string + account_string+'</li>';
+                                }
+                            });
+                            var list_group = '<ul class="list-group list-group-flush">' + current_item + '</ul>';
+                            cards += card_prefix + card_header + list_group + '</div>';
+                        }
+                        var record_list = document.getElementById("record-list");
+                        record_list.innerHTML = cards;
+                    }
+                });
+        　　 }
+            else {
+        　　　　 alert("请选择年和月!");
+        　　 }
         });
 
         $('#ie-type-list').change(function(){

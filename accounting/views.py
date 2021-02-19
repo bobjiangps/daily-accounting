@@ -318,6 +318,61 @@ def search_record(request):
         return JsonResponse({"error": "unauthenticated"})
 
 
+def filter_record_by_date(request):
+    if request.user.is_authenticated:
+        post_year = request.POST.get('year')
+        post_month = request.POST.get('month')
+        history_records = HistoryRecord.objects.filter(time_of_occurrence__year=post_year, time_of_occurrence__month=post_month).order_by("-time_of_occurrence")
+        transfer_records = TransferRecord.objects.filter(time_of_occurrence__year=post_year, time_of_occurrence__month=post_month).order_by("-time_of_occurrence")
+        day_has_record = []
+        custom_month_records = {}
+        for hr in history_records:
+            day_occur = hr.time_of_occurrence.strftime("%Y-%m-%d %A")
+            if hr.sub_category:
+                sub_category = hr.sub_category.name
+            else:
+                sub_category = "no sub category"
+            if hr.comment:
+                comment = hr.comment
+            else:
+                comment = ""
+            new_hr = {
+                "category": hr.category.name,
+                "subcategory": sub_category,
+                "amount": hr.amount,
+                "comment": comment,
+                "account": hr.account.name,
+                "ie_type": hr.category.category_type.lower(),
+                "record_type": "income_expense"
+            }
+            if day_occur not in day_has_record:
+                day_has_record.append(day_occur)
+                custom_month_records[day_occur] = [new_hr]
+            else:
+                custom_month_records[day_occur].append(new_hr)
+        for tr in transfer_records:
+            day_occur = tr.time_of_occurrence.strftime("%Y-%m-%d %A")
+            if tr.comment:
+                comment = tr.comment
+            else:
+                comment = ""
+            new_tr = {
+                "amount": tr.amount,
+                "comment": comment,
+                "from_account": tr.from_account.name,
+                "to_account": tr.to_account.name,
+                "record_type": "transfer"
+            }
+            if day_occur not in day_has_record:
+                day_has_record.append(day_occur)
+                custom_month_records[day_occur] = [new_tr]
+            else:
+                custom_month_records[day_occur].append(new_tr)
+        return JsonResponse({'day_has_record': day_has_record, "records": custom_month_records})
+    else:
+        return JsonResponse({"error": "unauthenticated"})
+
+
 def transfer_between_accounts(request):
     if request.user.is_authenticated:
         time_now = timezone.now()
